@@ -21,7 +21,7 @@ steps:
 
 - task: FortifyScanCentralSAST@7
   inputs:
-    scanCentralCtrlUrl: 'https://fortify-demo-lab-ctrl.keeggo.com/scancentral-ctrl'
+    scanCentralCtrlUrl: 'https://fortify-demo-lab.keeggo.com/scancentral-ctrl'
     scanCentralClientToken: '$(ScanCentral.ClientToken)'
     sscUrl: 'https://fortify-demo-lab.keeggo.com/ssc'
     sscCiToken: '$(ScanCentral.SscCiToken)'
