@@ -1,4 +1,13 @@
 # Universal Windows Platform
+- task: FortifySCA@7
+  inputs:
+    applicationType: 'other'
+    fortifyBuildId: 'webgoat'
+    runFortifyRulepackUpdate: true
+    fortifyScanType: 'LocalScan'
+    runFortifyUpload: true
+    fortifyApplicationName: 'webgoat'
+    fortifyApplicationVersion: '1'
 # Build a Universal Windows Platform project using Visual Studio.
 # Add steps that test and distribute an app, save build artifacts, and more:
 # https://aka.ms/yaml
