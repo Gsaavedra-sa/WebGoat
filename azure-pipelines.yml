@@ -19,6 +19,14 @@ variables:
 steps:
 - task: NuGetToolInstaller@1
 
+- task: FortifyScanCentralSAST@7
+  inputs:
+    scanCentralCtrlUrl: 'https://fortify-demo-lab-ctrl.keeggo.com/scancentral-ctrl'
+    scanCentralClientToken: '$(ScanCentral.ClientToken)'
+    sscUrl: 'https://fortify-demo-lab.keeggo.com/ssc'
+    sscCiToken: '$(ScanCentral.SscCiToken)'
+    uploadToSSC: true
+    buildTool: 'mvn'
 - task: FortifySCA@7
   inputs:
     applicationType: 'other'
@@ -26,9 +34,9 @@ steps:
     runFortifyRulepackUpdate: true
     fortifyScanType: 'LocalScan'
     runFortifyUpload: true
+    fortifyServerName: 'Fortify-CI'
     fortifyApplicationName: 'webgoat'
     fortifyApplicationVersion: '1'
-
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
