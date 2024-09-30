@@ -17,6 +17,7 @@ variables:
   appxPackageDir: '$(build.artifactStagingDirectory)\AppxPackages\\'
 
 steps:
+
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
@@ -29,14 +30,9 @@ steps:
     solution: '$(solution)'
     configuration: '$(buildConfiguration)'
     msbuildArgs: '/p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
-- job: SAST
-      displayName: Fortify Scancentral SAST
-      dependsOn:
-       - Build
-      pool: Default
-      steps:
-      - task: PowerShell@2
-        inputs:
+
+- task: PowerShell@2
+  inputs:
           targetType: 'inline'
           script: |
             Write-Host --- Versão do Java ---
