@@ -17,11 +17,13 @@ stages:
       pool:
         vmImage: ubuntu-latest
       steps:
+      
       - task: Maven@3
         inputs:
           mavenPomFile: 'pom.xml'
           publishJUnitResults: false
           javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.17'
           mavenVersionOption: 'Default'
           mavenOptions: '-Xmx3072m'
           mavenAuthenticateFeed: false
