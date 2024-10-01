@@ -20,11 +20,16 @@ stages:
       - task: Maven@3
         inputs:
           mavenPomFile: 'pom.xml'
-          mavenOptions: '-Xmx3072m'
+          publishJUnitResults: false
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
           javaHomeOption: 'JDKVersion'
           jdkVersionOption: '1.17'
-          jdkArchitectureOption: 'x64'
-          publishJUnitResults: false
+          mavenVersionOption: 'Default'
+          mavenOptions: '-Xmx3072m'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: false
+          sqMavenPluginVersionChoice: 'latest'
 
     - job: SAST
       displayName: Fortify SAST
