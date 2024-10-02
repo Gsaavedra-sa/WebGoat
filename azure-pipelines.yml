@@ -16,6 +16,11 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
+    - script: |
+        echo "Building the project with Maven..."
+        mvn clean package
+      displayName: 'Run Maven Build'
+
     - task: Docker@2
       displayName: Build an image
       inputs:
