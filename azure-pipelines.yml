@@ -19,8 +19,8 @@ stages:
       image: openjdk:17-jdk  # Use JDK 17
     steps:
     - script: |
-        apt-get update && apt-get install -y sudo  # Instala sudo
-        echo "azure_pipelines_sudo ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers  # Configura sudoers
+        echo "Installing Maven..."
+        apt-get update && apt-get install -y maven  # Instala o Maven
         echo "Building the project with Maven..."
         mvn clean package
       displayName: 'Run Maven Build'
