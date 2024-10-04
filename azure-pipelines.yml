@@ -1,13 +1,11 @@
-# Script for Linux and macOS
-pool: { vmImage: ubuntu-latest } # or whatever pool you use
+pool: 
+  vmImage: 'ubuntu-latest'  # Especifica o pool de VM
+
 steps:
-- checkout: none
-- bash: |
+- checkout: self  # Se você quiser ignorar o checkout, pode manter "none". Normalmente, você faria o checkout do repositório.
 
-    
+- script: |
     IMAGE_NAME="webgoat:latest"
-
-
     DOCKERFILE_PATH="Dockerfile"
     BUILD_CONTEXT="."
 
@@ -28,10 +26,8 @@ steps:
         docker rm $CONTAINER_NAME
     fi
 
- 
     echo "Running Docker container..."
     docker run -d --name $CONTAINER_NAME -p 8080:8080 -p 9090:9090 $IMAGE_NAME
-
 
     if [ $? -ne 0 ]; then
         echo "Docker container failed to start!"
@@ -39,5 +35,4 @@ steps:
     fi
 
     echo "Docker container is running on ports 8080 and 9090."
-
-    done
+  displayName: 'Build and Run Docker Container'
