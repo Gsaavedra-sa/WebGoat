@@ -1,47 +1,22 @@
 trigger:
   branches:
     include:
-      - main  # Ou outra branch que você deseja monitorar
+      - main  # Ajuste para a branch que deseja monitorar
 
 pool:
-  vmImage: 'ubuntu-latest'  # Utilize a imagem de VM que preferir
+  vmImage: 'ubuntu-latest'  # Usando uma VM com Ubuntu
 
 steps:
-  # Checkout do código
+  # Checkout do código-fonte
   - task: Checkout@1
     displayName: 'Check out source code'
 
-  # Build da imagem Docker com o Dockerfile presente na aplicação
-  - task: Docker@2
-    displayName: 'Build Docker Image'
-    inputs:
-      command: 'build'
-      Dockerfile: 'Dockerfile'  # Caminho para o Dockerfile no seu repositório
-      tags: 'webgoat:latest'  # Tag para identificar a imagem Docker
-
-  # Run do contêiner Docker para rodar a aplicação e fazer o build
-  - task: Docker@2
-    displayName: 'Run Docker container'
-    inputs:
-      command: 'run'
-      imageName: 'webgoat:latest'  # A imagem que foi construída
-      containerName: 'webgoat-container'  # Nome do contêiner a ser criado
-      options: '-d -p 8080:8080 -p 9090:9090'  # Opções para mapear portas ou outras necessidades
-
-  # Build da aplicação dentro do contêiner Docker
+  # Tornar o script executável
   - script: |
-      docker exec webgoat-container bash -c "cd /home/webgoat && ./build.sh"  # Substitua pelo comando real de build da sua aplicação
-    displayName: 'Build Application Inside Docker Container'
+      chmod +x ./build_docker.sh
+    displayName: 'Make build_docker.sh executable'
 
-  # Opcional: Remover o contêiner após o build
-  - task: Docker@2
-    displayName: 'Stop and remove Docker container'
-    inputs:
-      command: 'stop'
-      containerName: 'webgoat-container'
-  
-  - task: Docker@2
-    displayName: 'Remove Docker container'
-    inputs:
-      command: 'rm'
-      containerName: 'webgoat-container'
+  # Executar o script para construir e rodar o contêiner Docker
+  - script: |
+      ./build_docker.sh
+    displayName: 'Build and Run Docker Container'
