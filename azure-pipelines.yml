@@ -1,34 +1,47 @@
 trigger:
-- main
+  branches:
+    include:
+      - main  # Ou outra branch que você deseja monitorar
 
-resources:
-- repo: self
+pool:
+  vmImage: 'ubuntu-latest'  # Utilize a imagem de VM que preferir
 
-variables:
-  tag: '$(Build.BuildId)'
+steps:
+  # Checkout do código
+  - task: Checkout@1
+    displayName: 'Check out source code'
 
-stages:
-- stage: Build
-  displayName: Build image
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: ubuntu-latest
-    container:
-      image: openjdk:17-jdk  # Use JDK 17
-    steps:
-    - script: |
-        echo "Installing Maven..."
-        apt-get update && apt-get install -y maven  # Instala o Maven
-        echo "Building the project with Maven..."
-        mvn clean package
-      displayName: 'Run Maven Build'
+  # Build da imagem Docker com o Dockerfile presente na aplicação
+  - task: Docker@2
+    displayName: 'Build Docker Image'
+    inputs:
+      command: 'build'
+      Dockerfile: 'Dockerfile'  # Caminho para o Dockerfile no seu repositório
+      tags: 'webgoat:latest'  # Tag para identificar a imagem Docker
 
-    - task: Docker@2
-      displayName: Build an image
-      inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(tag)
+  # Run do contêiner Docker para rodar a aplicação e fazer o build
+  - task: Docker@2
+    displayName: 'Run Docker container'
+    inputs:
+      command: 'run'
+      imageName: 'webgoat:latest'  # A imagem que foi construída
+      containerName: 'webgoat-container'  # Nome do contêiner a ser criado
+      options: '-d -p 8080:8080 -p 9090:9090'  # Opções para mapear portas ou outras necessidades
+
+  # Build da aplicação dentro do contêiner Docker
+  - script: |
+      docker exec webgoat-container bash -c "cd /home/webgoat && ./build.sh"  # Substitua pelo comando real de build da sua aplicação
+    displayName: 'Build Application Inside Docker Container'
+
+  # Opcional: Remover o contêiner após o build
+  - task: Docker@2
+    displayName: 'Stop and remove Docker container'
+    inputs:
+      command: 'stop'
+      containerName: 'webgoat-container'
+  
+  - task: Docker@2
+    displayName: 'Remove Docker container'
+    inputs:
+      command: 'rm'
+      containerName: 'webgoat-container'
