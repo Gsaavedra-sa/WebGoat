@@ -1,22 +1,43 @@
-trigger:
-  branches:
-    include:
-      - main  # Ajuste para a branch que deseja monitorar
-
-pool:
-  vmImage: 'ubuntu-latest'  # Usando uma VM com Ubuntu
-
+# Script for Linux and macOS
+pool: { vmImage: ubuntu-latest } # or whatever pool you use
 steps:
-  # Checkout do código-fonte
-  - task: Checkout@1
-    displayName: 'Check out source code'
+- checkout: none
+- bash: |
 
-  # Tornar o script executável
-  - script: |
-      chmod +x ./build_docker.sh
-    displayName: 'Make build_docker.sh executable'
+    
+    IMAGE_NAME="webgoat:latest"
 
-  # Executar o script para construir e rodar o contêiner Docker
-  - script: |
-      ./build_docker.sh
-    displayName: 'Build and Run Docker Container'
+
+    DOCKERFILE_PATH="Dockerfile"
+    BUILD_CONTEXT="."
+
+    echo "Building Docker image..."
+    docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH $BUILD_CONTEXT
+
+    if [ $? -ne 0 ]; then
+        echo "Docker image build failed!"
+        exit 1
+    fi
+
+    CONTAINER_NAME="webgoat-container"
+    RUNNING_CONTAINER=$(docker ps -q -f name=$CONTAINER_NAME)
+
+    if [ ! -z "$RUNNING_CONTAINER" ]; then
+        echo "Stopping existing container..."
+        docker stop $CONTAINER_NAME
+        docker rm $CONTAINER_NAME
+    fi
+
+ 
+    echo "Running Docker container..."
+    docker run -d --name $CONTAINER_NAME -p 8080:8080 -p 9090:9090 $IMAGE_NAME
+
+
+    if [ $? -ne 0 ]; then
+        echo "Docker container failed to start!"
+        exit 1
+    fi
+
+    echo "Docker container is running on ports 8080 and 9090."
+
+    done
