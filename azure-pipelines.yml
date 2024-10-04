@@ -10,6 +10,13 @@ steps:
   # Checkout do código
   - checkout: self
 
+  # Etapa de build do projeto (Maven neste exemplo)
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'  # Caminho para o pom.xml
+      goals: 'package'  # Gera o JAR no diretório target
+      options: '-DskipTests'  # Opcional: pular testes
+
   # Construir a imagem Docker
   - script: |
       docker build -t webgoat/webgoat:latest -f Dockerfile .
