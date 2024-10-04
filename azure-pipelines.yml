@@ -1,38 +1,37 @@
-pool: 
-  vmImage: 'ubuntu-latest'  # Especifica o pool de VM
+trigger:
+  branches:
+    include:
+      - main  # Ou a branch que deseja monitorar
+
+pool:
+  vmImage: 'ubuntu-latest'  # Usa uma VM Linux
 
 steps:
-- checkout: self  # Se você quiser ignorar o checkout, pode manter "none". Normalmente, você faria o checkout do repositório.
+  # Checkout do código
+  - task: Checkout@1
+    displayName: 'Check out source code'
 
-- script: |
-    IMAGE_NAME="webgoat:latest"
-    DOCKERFILE_PATH="Dockerfile"
-    BUILD_CONTEXT="."
+  # Construir a imagem Docker usando o Dockerfile
+  - task: Docker@2
+    displayName: 'Build Docker Image'
+    inputs:
+      command: 'build'
+      Dockerfile: 'Dockerfile'  # Localização do Dockerfile no repositório
+      #containerRegistry: 'Container Registry'  # O registro de contêiner se necessário (se for publicar a imagem)
+      tags: 'webgoat/webgoat:latest'  # Tag da imagem
 
-    echo "Building Docker image..."
-    docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH $BUILD_CONTEXT
+  # Rodar o contêiner com a imagem criada
+  - task: Docker@2
+    displayName: 'Run Docker Container'
+    inputs:
+      command: 'run'
+      imageName: 'webgoat/webgoat:latest'  # A imagem criada
+      containerName: 'webgoat-container'  # Nome do contêiner
+      options: '-d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090'  # Mapeamento de portas
 
-    if [ $? -ne 0 ]; then
-        echo "Docker image build failed!"
-        exit 1
-    fi
-
-    CONTAINER_NAME="webgoat-container"
-    RUNNING_CONTAINER=$(docker ps -q -f name=$CONTAINER_NAME)
-
-    if [ ! -z "$RUNNING_CONTAINER" ]; then
-        echo "Stopping existing container..."
-        docker stop $CONTAINER_NAME
-        docker rm $CONTAINER_NAME
-    fi
-
-    echo "Running Docker container..."
-    docker run -d --name $CONTAINER_NAME -p 8080:8080 -p 9090:9090 $IMAGE_NAME
-
-    if [ $? -ne 0 ]; then
-        echo "Docker container failed to start!"
-        exit 1
-    fi
-
-    echo "Docker container is running on ports 8080 and 9090."
-  displayName: 'Build and Run Docker Container'
+  # Verificar a saúde do contêiner (opcional)
+  - script: |
+      echo "Checking container health..."
+      sleep 10  # Aguarda alguns segundos para o contêiner inicializar
+      curl http://127.0.0.1:8080/WebGoat/actuator/health
+    displayName: 'Check Docker Container Health'
