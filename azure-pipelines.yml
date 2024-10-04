@@ -29,9 +29,3 @@ steps:
       containerName: 'webgoat-container'  # Nome do contêiner
       options: '-d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090'  # Mapeamento de portas
 
-  # Verificar a saúde do contêiner (opcional)
-  - script: |
-      echo "Checking container health..."
-      sleep 10  # Aguarda alguns segundos para o contêiner inicializar
-      curl http://127.0.0.1:8080/WebGoat/actuator/health
-    displayName: 'Check Docker Container Health'
