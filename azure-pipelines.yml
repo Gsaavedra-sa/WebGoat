@@ -1,36 +1,21 @@
 trigger:
   branches:
     include:
-      - main  # Ou a branch que deseja monitorar
+      - main
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
   # Checkout do código
-  - task: Checkout@1
-    displayName: 'Check out source code'
+  - checkout: self
 
-  # Construir a imagem Docker usando o Dockerfile
-  - task: Docker@2
-    displayName: 'Build Docker Image'
-    inputs:
-      command: 'build'
-      Dockerfile: 'Dockerfile'
-      tags: 'webgoat/webgoat:latest'
-
-  # Rodar o contêiner com a imagem criada
-  - task: Docker@2
-    displayName: 'Run Docker Container'
-    inputs:
-      command: 'run'
-      imageName: 'webgoat/webgoat:latest'
-      containerName: 'webgoat-container'
-      options: '-d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090'
-
-  # Verificar a saúde do contêiner
+  # Construir a imagem Docker
   - script: |
-      echo "Checking container health..."
-      sleep 10
-      curl http://127.0.0.1:8080/WebGoat/actuator/health
-    displayName: 'Check Docker Container Health'
+      docker build -t webgoat/webgoat:latest -f Dockerfile .
+    displayName: 'Build Docker Image'
+
+  # Rodar o contêiner com a imagem construída
+  - script: |
+      docker run -d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090 webgoat/webgoat:latest
+    displayName: 'Run Docker Container'
